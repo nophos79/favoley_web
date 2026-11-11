@@ -1,0 +1,410 @@
+<title>Partidos Favoley</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@600;700&display=swap">
+<style>
+/* Layout: una columna móvil. Arriba, botón grande de la vista predeterminada; debajo, lista de vistas guardadas; al final, editor de vistas. */
+:root {
+  --bg: #f3f6f2;
+  --surface: #ffffff;
+  --fg: #172019;
+  --muted: #5b6a5e;
+  --line: #d5ddd4;
+  --accent: #205a21;
+  --accent-fg: #ffffff;
+  --live: #c2410c;
+  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-head: "Space Grotesk", "Inter", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1711; --surface: #18231a; --fg: #e8efe7; --muted: #9db0a0;
+    --line: #2b3b2d; --accent: #6fcf72; --accent-fg: #0b1a0c; --live: #fb923c;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1711; --surface: #18231a; --fg: #e8efe7; --muted: #9db0a0;
+  --line: #2b3b2d; --accent: #6fcf72; --accent-fg: #0b1a0c; --live: #fb923c;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--font-body);
+  font-size: 15px; line-height: 1.45;
+  padding-block: 20px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+main { max-width: 560px; margin: 0 auto; display: grid; gap: 20px; }
+h1 { font-family: var(--font-head); font-size: 24px; margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
+h2 { font-family: var(--font-head); font-size: 16px; margin: 0 0 10px; }
+.sub { color: var(--muted); margin: 4px 0 0; }
+.label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 600; }
+.hero {
+  display: grid; gap: 6px; padding: 16px; border-radius: 12px;
+  background: var(--accent); color: var(--accent-fg); text-decoration: none;
+}
+.hero .label { color: inherit; opacity: 0.8; }
+.hero strong { font-family: var(--font-head); font-size: 20px; line-height: 1.2; overflow-wrap: anywhere; }
+.hero span.go { font-weight: 600; }
+.hero:focus-visible, a:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid var(--live); outline-offset: 2px; }
+ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+li { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; display: grid; gap: 8px; padding: 12px; }
+li.default { border-color: var(--accent); }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.row > * { min-width: 0; }
+.name { font-weight: 600; flex: 1 1 160px; overflow-wrap: anywhere; }
+.badge { font-size: 12px; font-weight: 600; color: var(--accent); border: 1px solid var(--accent); border-radius: 999px; padding: 1px 8px; }
+.params { display: grid; gap: 2px; color: var(--muted); font-size: 13px; }
+.params b { font-weight: 600; color: var(--fg); }
+.params span { overflow-wrap: anywhere; }
+a.open, button {
+  font: inherit; font-weight: 500; cursor: pointer; min-height: 40px; padding: 0 14px;
+  border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--fg);
+  display: inline-flex; align-items: center; text-decoration: none;
+}
+a.open { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+button.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+button.quiet { border-color: transparent; background: transparent; color: var(--muted); }
+form { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px; display: grid; gap: 12px; }
+.field { display: grid; gap: 4px; }
+.field > label { font-size: 13px; color: var(--muted); font-weight: 500; }
+.pair { display: grid; grid-template-columns: minmax(0, 1fr) 84px; gap: 8px; }
+input {
+  font: inherit; min-height: 40px; padding: 0 10px; width: 100%;
+  border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--fg);
+}
+input.code { font-variant-numeric: tabular-nums; text-align: center; }
+.cols { display: grid; grid-template-columns: minmax(0, 1fr) 84px; gap: 8px; font-size: 12px; color: var(--muted); }
+.hint { font-size: 13px; color: var(--muted); margin: 0; }
+.status { min-height: 20px; font-size: 13px; color: var(--accent); margin: 0; }
+.note { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; margin: 0; }
+</style>
+
+<main>
+  <header>
+    <h1>Partidos Favoley</h1>
+    <p class="sub">Tus vistas guardadas de “Partidos en juego” de la Federación Andaluza de Voleibol. Cada una abre la web ya filtrada.</p>
+  </header>
+
+  <a id="hero" class="hero" href="#" target="_blank" rel="noopener noreferrer"></a>
+
+  <section aria-labelledby="h-vistas">
+    <h2 id="h-vistas">Vistas guardadas</h2>
+    <ul id="list"></ul>
+  </section>
+
+  <section aria-labelledby="h-marcadores">
+    <h2 id="h-marcadores">Marcadores guardados</h2>
+    <ul id="mlist"></ul>
+    <form id="mform" autocomplete="off" style="margin-top:8px">
+      <div class="field">
+        <label for="m-url">Enlace del marcador (o su número)</label>
+        <input id="m-url" type="text" inputmode="url" placeholder="https://favoley.net/publico/seccion.php?seccion=marcador&amp;id=5571">
+      </div>
+      <div class="field">
+        <label for="m-name">Nombre (opcional)</label>
+        <input id="m-name" type="text" placeholder="Ej.: Esquimo, jornada 5">
+      </div>
+      <p class="hint">Para obtener el enlace: en la web, abre un partido de la lista y copia la dirección de esa página.</p>
+      <div class="row"><button class="primary" type="submit">Guardar marcador</button></div>
+      <p id="mstatus" class="status" role="status"></p>
+    </form>
+  </section>
+
+  <section aria-labelledby="h-edit">
+    <h2 id="h-edit">Nueva vista</h2>
+    <form id="form" autocomplete="off">
+      <div class="field">
+        <label for="f-name">Nombre de la vista</label>
+        <input id="f-name" type="text" placeholder="Ej.: Cadete femenino Sevilla">
+      </div>
+      <div class="field">
+        <label for="f-url">Pegar enlace de la web (rellena los códigos y las descripciones conocidas)</label>
+        <input id="f-url" type="url" inputmode="url" placeholder="https://favoley.net/publico/seccion.php?seccion=partidos-en-juego&amp;…">
+      </div>
+      <div class="cols" aria-hidden="true"><span>Descripción</span><span>Código</span></div>
+      <div id="fields" style="display:grid;gap:12px"></div>
+      <p class="hint">Escribe la descripción tal como aparece en el desplegable de la web. El código lo usa la web para filtrar (0 = Todas). La app recuerda cada pareja código-descripción y la rellena sola la próxima vez.</p>
+      <div class="row">
+        <button class="primary" type="submit" id="save">Guardar vista</button>
+        <button type="button" id="cancel" class="quiet" hidden>Cancelar edición</button>
+      </div>
+      <p id="status" class="status" role="status"></p>
+    </form>
+  </section>
+
+  <p class="note">Las vistas se guardan solo en este navegador. Si la web muestra una pantalla de verificación, espera unos segundos a que cargue.</p>
+  <div class="row"><button type="button" id="reset" class="quiet">Restaurar vistas iniciales</button></div>
+</main>
+
+<script>
+(function () {
+  var BASE = "https://favoley.net/publico/seccion.php?seccion=partidos-en-juego";
+  var FILTERS = [
+    { k: "delegacion", label: "Delegación", all: "Todas" },
+    { k: "categoria", label: "Categoría", all: "Todas" },
+    { k: "division", label: "División", all: "Todas" },
+    { k: "competicion", label: "Competición", all: "Todas" },
+    { k: "grupo", label: "Grupo", all: "Todos" },
+    { k: "fase", label: "Fase", all: "Todas" },
+    { k: "club", label: "Club", all: "Todos" }
+  ];
+  var STORE = "favoley-vistas-v2";
+
+  function emptyP() { var p = {}; FILTERS.forEach(function (f) { p[f.k] = 0; }); return p; }
+  function emptyDict() { var d = {}; FILTERS.forEach(function (f) { d[f.k] = {}; }); return d; }
+
+  function initial() {
+    var dict = emptyDict();
+    dict.categoria["2"] = "Infantil";
+    dict.competicion["1290"] = "INFANTIL MASCULINO SEVILLA LIGA PROVINCIAL";
+    dict.club["105"] = "ESQUIMO C.A.V";
+    var p1 = emptyP(); p1.categoria = 2; p1.competicion = 1290; p1.club = 105;
+    return {
+      def: "v1",
+      dict: dict,
+      views: [
+        { id: "v1", name: "ESQUIMO C.A.V · Infantil masculino Sevilla", p: p1,
+          d: { categoria: "Infantil", competicion: "INFANTIL MASCULINO SEVILLA LIGA PROVINCIAL", club: "ESQUIMO C.A.V" } },
+        { id: "v2", name: "Todos los partidos", p: emptyP(), d: {} }
+      ]
+    };
+  }
+  function load() {
+    try {
+      var raw = localStorage.getItem(STORE);
+      if (raw) {
+        var s = JSON.parse(raw);
+        if (s && Array.isArray(s.views) && s.views.length) { s.dict = s.dict || emptyDict(); return s; }
+      }
+    } catch (e) {}
+    return initial();
+  }
+  function save() { try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (e) {} }
+
+  var state = load();
+  state.matches = state.matches || [];
+  var editing = null;
+  var MBASE = "https://favoley.net/publico/seccion.php?seccion=marcador&id=";
+
+  function code(v) { return parseInt(v, 10) || 0; }
+  function urlFor(p) {
+    return BASE + "&" + FILTERS.map(function (f) { return f.k + "=" + code(p[f.k]); }).join("&");
+  }
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
+  }
+  function btn(text, fn, cls) {
+    var b = el("button", cls || "", text);
+    b.type = "button";
+    b.addEventListener("click", function () { fn(b); });
+    return b;
+  }
+  function setStatus(t) { document.getElementById("status").textContent = t || ""; }
+
+  function render() {
+    var def = state.views.filter(function (v) { return v.id === state.def; })[0] || state.views[0];
+    var hero = document.getElementById("hero");
+    hero.href = urlFor(def.p);
+    hero.textContent = "";
+    hero.appendChild(el("span", "label", "Vista predeterminada"));
+    hero.appendChild(el("strong", "", def.name));
+    hero.appendChild(el("span", "go", "Abrir partidos →"));
+
+    var list = document.getElementById("list");
+    list.textContent = "";
+    state.views.forEach(function (v) {
+      var li = el("li", v.id === def.id ? "default" : "");
+      var top = el("div", "row");
+      top.appendChild(el("span", "name", v.name));
+      if (v.id === def.id) top.appendChild(el("span", "badge", "Predeterminada"));
+      li.appendChild(top);
+
+      var params = el("div", "params");
+      var any = false;
+      FILTERS.forEach(function (f) {
+        var c = code(v.p[f.k]);
+        if (c > 0) {
+          any = true;
+          var line = el("span");
+          line.appendChild(el("b", "", f.label + ": "));
+          line.appendChild(document.createTextNode((v.d && v.d[f.k]) || ("sin descripción (código " + c + ")")));
+          params.appendChild(line);
+        }
+      });
+      if (!any) params.appendChild(el("span", "", "Sin filtros: todos los partidos"));
+      li.appendChild(params);
+
+      var act = el("div", "row");
+      var a = el("a", "open", "Abrir");
+      a.href = urlFor(v.p); a.target = "_blank"; a.rel = "noopener noreferrer";
+      act.appendChild(a);
+      if (v.id !== def.id) act.appendChild(btn("Hacer predeterminada", function () { state.def = v.id; save(); render(); }));
+      act.appendChild(btn("Editar", function () { startEdit(v); }));
+      act.appendChild(btn("Copiar enlace", function (b) { copy(urlFor(v.p), b); }));
+      if (state.views.length > 1) act.appendChild(btn("Borrar", function () { remove(v.id); }, "quiet"));
+      li.appendChild(act);
+      list.appendChild(li);
+    });
+    renderMatches();
+  }
+  function matchId(t) {
+    t = (t || "").trim();
+    if (/^\d+$/.test(t)) return t;
+    try {
+      var u = new URL(t);
+      var id = u.searchParams.get("id");
+      if (u.hostname.indexOf("favoley.net") !== -1 && /^\d+$/.test(id || "")) return id;
+    } catch (e) {}
+    return null;
+  }
+  function renderMatches() {
+    var ul = document.getElementById("mlist");
+    ul.textContent = "";
+    if (!state.matches.length) {
+      var empty = el("li");
+      empty.appendChild(el("span", "params", "Aún no hay marcadores guardados. Pega abajo el enlace de un partido."));
+      ul.appendChild(empty);
+      return;
+    }
+    state.matches.forEach(function (m) {
+      var li = el("li");
+      li.appendChild(el("span", "name", m.name || ("Marcador " + m.id)));
+      li.appendChild(el("div", "params", "Marcador n.º " + m.id));
+      var act = el("div", "row");
+      var a = el("a", "open", "Abrir marcador");
+      a.href = MBASE + m.id; a.target = "_blank"; a.rel = "noopener noreferrer";
+      act.appendChild(a);
+      act.appendChild(btn("Copiar enlace", function (b) { copy(MBASE + m.id, b); }));
+      act.appendChild(btn("Borrar", function () {
+        state.matches = state.matches.filter(function (x) { return x !== m; });
+        save(); renderMatches();
+      }, "quiet"));
+      li.appendChild(act);
+      ul.appendChild(li);
+    });
+  }
+  function copy(text, b) {
+    var old = b.textContent;
+    function done(ok) { b.textContent = ok ? "Copiado" : "No se pudo copiar"; setTimeout(function () { b.textContent = old; }, 1500); }
+    try { navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); }); }
+    catch (e) { done(false); }
+  }
+  function remove(id) {
+    state.views = state.views.filter(function (v) { return v.id !== id; });
+    if (state.def === id) state.def = state.views[0].id;
+    if (editing === id) stopEdit();
+    save(); render();
+  }
+
+  /* Formulario: una fila por filtro con descripción y código */
+  var fieldsBox = document.getElementById("fields");
+  FILTERS.forEach(function (f) {
+    var wrap = el("div", "field");
+    var lab = el("label", "", f.label);
+    lab.setAttribute("for", "d-" + f.k);
+    var pair = el("div", "pair");
+    var d = el("input"); d.id = "d-" + f.k; d.type = "text"; d.placeholder = f.all;
+    var c = el("input", "code"); c.id = "p-" + f.k; c.type = "number"; c.min = "0"; c.value = "0";
+    c.setAttribute("aria-label", "Código de " + f.label);
+    c.setAttribute("inputmode", "numeric");
+    c.addEventListener("input", function () {
+      var known = state.dict[f.k] && state.dict[f.k][String(code(c.value))];
+      if (known && !d.value.trim()) d.value = known;
+    });
+    pair.appendChild(d); pair.appendChild(c);
+    wrap.appendChild(lab); wrap.appendChild(pair);
+    fieldsBox.appendChild(wrap);
+  });
+
+  function fillForm(p, d) {
+    FILTERS.forEach(function (f) {
+      var c = code(p[f.k]);
+      document.getElementById("p-" + f.k).value = c;
+      var desc = (d && d[f.k]) || (c > 0 && state.dict[f.k] && state.dict[f.k][String(c)]) || "";
+      document.getElementById("d-" + f.k).value = desc;
+    });
+  }
+  function startEdit(v) {
+    editing = v.id;
+    document.getElementById("f-name").value = v.name;
+    document.getElementById("f-url").value = "";
+    fillForm(v.p, v.d);
+    document.getElementById("h-edit").textContent = "Editar vista";
+    document.getElementById("save").textContent = "Guardar cambios";
+    document.getElementById("cancel").hidden = false;
+    setStatus("");
+    document.getElementById("form").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  function stopEdit() {
+    editing = null;
+    document.getElementById("form").reset();
+    fillForm(emptyP(), {});
+    document.getElementById("h-edit").textContent = "Nueva vista";
+    document.getElementById("save").textContent = "Guardar vista";
+    document.getElementById("cancel").hidden = true;
+  }
+
+  document.getElementById("f-url").addEventListener("input", function (e) {
+    var t = e.target.value.trim();
+    if (!t) return;
+    try {
+      var u = new URL(t);
+      if (u.hostname.indexOf("favoley.net") === -1) { setStatus("El enlace no es de favoley.net."); return; }
+      var p = {};
+      FILTERS.forEach(function (f) { p[f.k] = code(u.searchParams.get(f.k)); });
+      fillForm(p, {});
+      var missing = FILTERS.filter(function (f) {
+        return p[f.k] > 0 && !document.getElementById("d-" + f.k).value.trim();
+      }).map(function (f) { return f.label; });
+      setStatus(missing.length
+        ? "Filtros leídos. Escribe la descripción de: " + missing.join(", ") + "."
+        : "Filtros leídos del enlace.");
+    } catch (err) { setStatus("Ese texto no es un enlace válido."); }
+  });
+
+  document.getElementById("form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var name = document.getElementById("f-name").value.trim();
+    if (!name) { setStatus("Escribe un nombre para la vista."); document.getElementById("f-name").focus(); return; }
+    var p = {}, d = {};
+    FILTERS.forEach(function (f) {
+      var c = code(document.getElementById("p-" + f.k).value);
+      var desc = document.getElementById("d-" + f.k).value.trim();
+      p[f.k] = c;
+      if (c > 0 && desc) { d[f.k] = desc; state.dict[f.k][String(c)] = desc; }
+    });
+    if (editing) {
+      state.views.forEach(function (v) { if (v.id === editing) { v.name = name; v.p = p; v.d = d; } });
+      setStatus("Vista actualizada.");
+    } else {
+      state.views.push({ id: "v" + Date.now(), name: name, p: p, d: d });
+      setStatus("Vista guardada.");
+    }
+    save(); stopEdit(); render();
+  });
+  document.getElementById("cancel").addEventListener("click", function () { stopEdit(); setStatus(""); });
+  document.getElementById("reset").addEventListener("click", function () {
+    var keep = state.matches;
+    state = initial(); state.matches = keep; save(); stopEdit(); setStatus("Vistas iniciales restauradas."); render();
+  });
+  document.getElementById("mform").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var st = document.getElementById("mstatus");
+    var id = matchId(document.getElementById("m-url").value);
+    if (!id) { st.textContent = "No encuentro el número del marcador. Pega el enlace completo de la página del partido."; return; }
+    var name = document.getElementById("m-name").value.trim();
+    var found = state.matches.filter(function (m) { return m.id === id; })[0];
+    if (found) { if (name) found.name = name; st.textContent = "Ese marcador ya estaba guardado; actualizado."; }
+    else { state.matches.push({ id: id, name: name }); st.textContent = "Marcador guardado."; }
+    document.getElementById("mform").reset();
+    save(); renderMatches();
+  });
+
+  render();
+})();
+</script>
